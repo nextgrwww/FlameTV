@@ -5,42 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FlameTV IPTV Player</title>
     
-    <!-- PWA Setup: Theme Color & Apple Touch Icon -->
-    <meta name="theme-color" content="#f97316">
+    <!-- PWA Setup -->
+    <meta name="theme-color" content="#2b0f4c">
     <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2Y5NzMxNiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik04LjUgMTQuNUEyLjUgMi41IDAgMCAwIDExIDEyYzAtMS4zOC0uNS0yLTEtMy0xLjA3Mi0yLjE0My0uMjI0LTQuMDU0IDItNiAuNSAyLjUgMiA0LjkgNCA2LjUgMiAxLjYgMyAzLjUgMyA1LjVhNyA3IDAgMSAxLTE0IDBjMC0xLjE1My40MzMtMi4yOTQgMS0zYTIuNSAyLjUgMCAwIDAgMi41IDIuNXoiLz48L3N2Zz4=">
     
-    <!-- PWA Manifest & Minimal Service Worker (Dynamically injected to keep the app strictly single-file) -->
     <script>
         const pwaManifest = {
             "name": "FlameTV IPTV Player",
             "short_name": "FlameTV",
             "start_url": ".",
             "display": "standalone",
-            "background_color": "#0f111a",
-            "theme_color": "#f97316",
+            "background_color": "#2b0f4c",
+            "theme_color": "#2b0f4c",
             "icons": [
                 {
                     "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2Y5NzMxNiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik04LjUgMTQuNUEyLjUgMi41IDAgMCAwIDExIDEyYzAtMS4zOC0uNS0yLTEtMy0xLjA3Mi0yLjE0My0uMjI0LTQuMDU0IDItNiAuNSAyLjUgMiA0LjkgNCA2LjUgMiAxLjYgMyAzLjUgMyA1LjVhNyA3IDAgMSAxLTE0IDBjMC0xLjE1My40MzMtMi4yOTQgMS0zYTIuNSAyLjUgMCAwIDAgMi41IDIuNXoiLz48L3N2Zz4=",
                     "sizes": "192x192",
                     "type": "image/svg+xml",
                     "purpose": "any maskable"
-                },
-                {
-                    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2Y5NzMxNiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik04LjUgMTQuNUEyLjUgMi41IDAgMCAwIDExIDEyYzAtMS4zOC0uNS0yLTEtMy0xLjA3Mi0yLjE0My0uMjI0LTQuMDU0IDItNiAuNSAyLjUgMiA0LjkgNCA2LjUgMiAxLjYgMyAzLjUgMyA1LjVhNyA3IDAgMSAxLTE0IDBjMC0xLjE1My40MzMtMi4yOTQgMS0zYTIuNSAyLjUgMCAwIDAgMi41IDIuNXoiLz48L3N2Zz4=",
-                    "sizes": "512x512",
-                    "type": "image/svg+xml",
-                    "purpose": "any maskable"
                 }
             ]
         };
-        
-        // Append Manifest
         const manifestLink = document.createElement('link');
         manifestLink.rel = 'manifest';
         manifestLink.href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(pwaManifest));
         document.head.appendChild(manifestLink);
 
-        // Register Minimal Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 const swCode = "self.addEventListener('fetch', () => {});";
@@ -56,17 +46,15 @@
     <!-- React & ReactDOM -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-    
-    <!-- Babel for in-browser JSX compilation -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
-<body class="bg-[#0f111a] text-white overflow-hidden">
+<body class="bg-black text-white overflow-hidden">
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useMemo, useRef } = React;
 
-        // --- INLINE ICONS (Replacing lucide-react for zero dependencies) ---
+        // --- ICONS ---
         const Flame = ({ className, size=24 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>);
         const Search = ({ className, size=24 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>);
         const Home = ({ className, size=24 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>);
@@ -77,8 +65,10 @@
         const AlertCircle = ({ className, size=24 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>);
         const ArrowLeft = ({ className, size=24 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>);
         const Play = ({ className, size=24 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="5 3 19 12 5 21 5 3"/></svg>);
+        const Info = ({ className, size=24 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>);
+        const HelpCircle = ({ className, size=24 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>);
 
-        // --- SAMPLE DATA ---
+        // --- SAMPLE DATA & UTILS ---
         const SAMPLE_M3U = `#EXTM3U
 #EXTINF:-1 tvg-id="" tvg-name="NASA TV" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/e/e5/NASA_logo.svg" group-title="Science",NASA TV
 https://ntv1.akamaized.net/hls/live/2014075/NASA-NTV1-HLS/master.m3u8
@@ -89,7 +79,6 @@ https://live-hls-web-aje.getaj.net/AJE/index.m3u8
 #EXTINF:-1 tvg-id="" tvg-name="Sky News" tvg-logo="https://upload.wikimedia.org/wikipedia/en/thumb/e/e4/Sky_News_logo.svg/1200px-Sky_News_logo.svg.png" group-title="News",Sky News
 https://skynewsau-live.akamaized.net/hls/live/2002689/skynewsau-extra1/master.m3u8`;
 
-        // --- UTILS ---
         const genId = () => Math.random().toString(36).substring(2, 9) + Date.now().toString(36);
 
         const parseM3U = (text) => {
@@ -100,7 +89,6 @@ https://skynewsau-live.akamaized.net/hls/live/2002689/skynewsau-extra1/master.m3
           lines.forEach(line => {
             line = line.trim();
             if (!line) return;
-
             if (line.startsWith('#EXTINF:')) {
               const logoMatch = line.match(/tvg-logo="([^"]*)"/);
               const groupMatch = line.match(/group-title="([^"]*)"/);
@@ -120,6 +108,36 @@ https://skynewsau-live.akamaized.net/hls/live/2002689/skynewsau-extra1/master.m3
             }
           });
           return channels;
+        };
+
+        const getInitials = (name) => {
+            const words = name.replace(/[^a-zA-Z0-9 ]/g, '').trim().split(' ');
+            if (words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
+            if (words.length === 1 && words[0].length >= 2) return words[0].substring(0, 2).toUpperCase();
+            if (name.length > 0) return name.substring(0, 2).toUpperCase();
+            return 'TV';
+        };
+
+        const getGradient = (name) => {
+            const gradients = [
+                'from-purple-600 to-blue-600', 'from-pink-600 to-rose-600', 'from-emerald-500 to-teal-700',
+                'from-orange-500 to-red-600', 'from-indigo-600 to-cyan-600', 'from-yellow-500 to-orange-600'
+            ];
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            return gradients[Math.abs(hash) % gradients.length];
+        };
+
+        // --- CLOCK COMPONENT ---
+        const Clock = () => {
+            const [time, setTime] = useState('');
+            useEffect(() => {
+                const tick = () => setTime(new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}));
+                tick();
+                const id = setInterval(tick, 1000);
+                return () => clearInterval(id);
+            }, []);
+            return <div className="absolute top-8 right-12 text-3xl font-light text-white/90 drop-shadow-md tracking-wider z-50">{time}</div>;
         };
 
         // --- VIDEO PLAYER COMPONENT ---
@@ -142,9 +160,7 @@ https://skynewsau-live.akamaized.net/hls/live/2002689/skynewsau-extra1/master.m3
                   videoRef.current.play().catch(() => console.log("Autoplay prevented"));
                 });
                 hls.on(window.Hls.Events.ERROR, (event, data) => {
-                  if (data.fatal) {
-                     setError(true); setLoading(false);
-                  }
+                  if (data.fatal) { setError(true); setLoading(false); }
                 });
               } else if (videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
                 videoRef.current.src = channel.url;
@@ -152,9 +168,7 @@ https://skynewsau-live.akamaized.net/hls/live/2002689/skynewsau-extra1/master.m3
                    setLoading(false);
                    videoRef.current.play().catch(() => console.log("Autoplay prevented"));
                 });
-                videoRef.current.addEventListener('error', () => {
-                   setError(true); setLoading(false);
-                });
+                videoRef.current.addEventListener('error', () => { setError(true); setLoading(false); });
               }
             };
 
@@ -180,9 +194,8 @@ https://skynewsau-live.akamaized.net/hls/live/2002689/skynewsau-extra1/master.m3
 
              const handleKey = (e) => {
                 resetTimer();
-                if (e.key === 'Escape' || e.key === 'Backspace') {
-                   onBack();
-                } else if (e.key === ' ' || e.key === 'MediaPlayPause') {
+                if (e.key === 'Escape' || e.key === 'Backspace') onBack();
+                else if (e.key === ' ' || e.key === 'MediaPlayPause') {
                    if (videoRef.current) {
                       if (videoRef.current.paused) videoRef.current.play();
                       else videoRef.current.pause();
@@ -201,7 +214,7 @@ https://skynewsau-live.akamaized.net/hls/live/2002689/skynewsau-extra1/master.m3
           }, [onBack]);
 
           return (
-            <div className="fixed inset-0 bg-black z-[100] flex items-center justify-center">
+            <div className="fixed inset-0 bg-black z-[100] flex items-center justify-center cursor-none">
                {loading && <div className="absolute z-10 text-white flex flex-col items-center"><Loader2 className="animate-spin w-12 h-12 mb-4 text-orange-500" />Tuning in...</div>}
                {error && <div className="absolute z-10 text-white flex flex-col items-center"><AlertCircle className="w-12 h-12 mb-4 text-red-500" />Stream Offline or Invalid URL.</div>}
 
@@ -228,23 +241,61 @@ https://skynewsau-live.akamaized.net/hls/live/2002689/skynewsau-extra1/master.m3
           </div>
         );
 
+        const AnimatedHomeBanner = () => (
+           <div className="relative w-full h-[35vh] overflow-hidden rounded-3xl mb-12 shadow-[0_10px_40px_rgba(0,0,0,0.5)] flex-shrink-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-orange-800">
+               <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
+                   <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[150%] bg-white/10 blur-[80px] rotate-12 animate-pulse"></div>
+                   <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[120%] bg-orange-500/20 blur-[100px] -rotate-12 animate-pulse" style={{ animationDelay: '1s' }}></div>
+               </div>
+               <div className="relative z-10 p-12 flex flex-col justify-center h-full">
+                   <div className="flex items-center space-x-4 mb-4">
+                       <FuturisticFireLogo className="w-12 h-12" />
+                       <h1 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-300 to-yellow-100 drop-shadow-lg tracking-tight">FlameTV</h1>
+                   </div>
+                   <p className="text-2xl text-white/90 font-light max-w-2xl drop-shadow-md">Your Ultimate Entertainment Hub. Browse live channels, news, and sports instantly in one place.</p>
+               </div>
+           </div>
+        );
+
         // --- MAIN APP VIEW ---
         function App() {
-          const [playlists, setPlaylists] = useState([
-            { id: 'sample', name: 'Global News & Space', channels: parseM3U(SAMPLE_M3U) }
-          ]);
+          // --- Persistent LocalStorage State ---
+          const [playlists, setPlaylists] = useState(() => {
+              const saved = localStorage.getItem('flametv_playlists');
+              if (saved) {
+                  try { return JSON.parse(saved); } catch(e) {}
+              }
+              return [{ id: 'sample', name: 'Global News & Space', channels: parseM3U(SAMPLE_M3U) }];
+          });
 
+          useEffect(() => {
+              localStorage.setItem('flametv_playlists', JSON.stringify(playlists));
+          }, [playlists]);
+
+          // --- Auto Hide Mouse State ---
+          const [mouseHidden, setMouseHidden] = useState(false);
+          useEffect(() => {
+              let timeout;
+              const handleMouseMove = () => {
+                  setMouseHidden(false);
+                  clearTimeout(timeout);
+                  timeout = setTimeout(() => setMouseHidden(true), 3500);
+              };
+              window.addEventListener('mousemove', handleMouseMove);
+              handleMouseMove(); // Init
+              return () => window.removeEventListener('mousemove', handleMouseMove);
+          }, []);
+
+          // --- App State ---
           const [selectedSidebarId, setSelectedSidebarId] = useState('home');
           const [playingChannel, setPlayingChannel] = useState(null);
           
           const [navState, setNavState] = useState({
              zone: 'sidebar',
-             sidebarIndex: 1,
+             sidebarIndex: 1, // Home is index 1
              contentRow: 0,
              contentCol: 0
           });
-
-          const [heroChannel, setHeroChannel] = useState(null);
 
           const [newPlName, setNewPlName] = useState('');
           const [newPlContent, setNewPlContent] = useState('');
@@ -253,18 +304,22 @@ https://skynewsau-live.akamaized.net/hls/live/2002689/skynewsau-extra1/master.m3
 
           const sidebarItems = useMemo(() => {
             return [
-              { id: 'search', icon: <Search size={24}/>, label: 'Search' },
-              { id: 'home', icon: <Home size={24}/>, label: 'All Channels' },
-              ...playlists.map(p => ({ id: p.id, icon: <List size={24}/>, label: p.name })),
-              { id: 'settings', icon: <Settings size={24}/>, label: 'Settings & Import' }
+              { id: 'search', icon: <Search size={22}/>, label: 'Search' },
+              { id: 'home', icon: <Home size={22}/>, label: 'Home' },
+              ...playlists.map(p => ({ id: p.id, icon: <List size={22}/>, label: p.name })),
+              { id: 'settings', icon: <Settings size={22}/>, label: 'Settings' },
+              { id: 'help', icon: <HelpCircle size={22}/>, label: 'Help' },
+              { id: 'about', icon: <Info size={22}/>, label: 'About' }
             ];
           }, [playlists]);
 
           const contentRows = useMemo(() => {
+             if (['settings', 'help', 'about'].includes(selectedSidebarId)) return [];
+
              let allChannels = [];
              if (selectedSidebarId === 'home') {
                 allChannels = playlists.flatMap(p => p.channels);
-             } else if (selectedSidebarId !== 'settings') {
+             } else {
                 const pl = playlists.find(p => p.id === selectedSidebarId);
                 if (pl) allChannels = pl.channels;
              }
@@ -278,17 +333,7 @@ https://skynewsau-live.akamaized.net/hls/live/2002689/skynewsau-extra1/master.m3
              return Object.entries(grouped).map(([title, channels]) => ({ title, channels }));
           }, [playlists, selectedSidebarId]);
 
-          useEffect(() => {
-             if (navState.zone === 'content' && contentRows.length > 0) {
-                const row = contentRows[navState.contentRow];
-                if (row && row.channels) setHeroChannel(row.channels[navState.contentCol]);
-             } else if (navState.zone === 'sidebar' && contentRows.length > 0) {
-                setHeroChannel(contentRows[0]?.channels[0]);
-             } else if (selectedSidebarId === 'settings') {
-                setHeroChannel(null);
-             }
-          }, [navState, contentRows, selectedSidebarId]);
-
+          // --- Spatial Navigation Logic ---
           useEffect(() => {
             if (playingChannel) return;
 
@@ -313,7 +358,7 @@ https://skynewsau-live.akamaized.net/hls/live/2002689/skynewsau-extra1/master.m3
                           case 'ArrowUp': sidebarIndex = Math.max(0, sidebarIndex - 1); break;
                           case 'ArrowDown': sidebarIndex = Math.min(sidebarItems.length - 1, sidebarIndex + 1); break;
                           case 'ArrowRight':
-                              if (selectedSidebarId === 'settings') {
+                              if (['settings'].includes(selectedSidebarId)) {
                                   zone = 'settings';
                                   setTimeout(() => document.getElementById('pl-name')?.focus(), 50);
                               } else if (contentRows.length > 0) {
@@ -321,11 +366,12 @@ https://skynewsau-live.akamaized.net/hls/live/2002689/skynewsau-extra1/master.m3
                                   contentRow = Math.min(contentRow, contentRows.length - 1);
                                   contentCol = Math.min(contentCol, contentRows[contentRow].channels.length - 1);
                               }
+                              // Note: Right Arrow does nothing if on Help/About to keep focus bounded.
                               break;
                           case 'Enter':
                               const targetId = sidebarItems[sidebarIndex].id;
                               setSelectedSidebarId(targetId);
-                              if (targetId !== 'settings' && targetId !== 'search') {
+                              if (!['settings', 'help', 'about', 'search'].includes(targetId)) {
                                   zone = 'content';
                                   contentRow = 0;
                                   contentCol = 0;
@@ -342,6 +388,8 @@ https://skynewsau-live.akamaized.net/hls/live/2002689/skynewsau-extra1/master.m3
                               if (contentRow > 0) {
                                   contentRow--;
                                   contentCol = Math.min(contentCol, contentRows[contentRow].channels.length - 1);
+                              } else {
+                                  // Scroll to top or do nothing (Roku style)
                               }
                               break;
                           case 'ArrowDown':
@@ -378,6 +426,7 @@ https://skynewsau-live.akamaized.net/hls/live/2002689/skynewsau-extra1/master.m3
             return () => window.removeEventListener('keydown', handleNav);
           }, [playingChannel, contentRows, sidebarItems, selectedSidebarId]);
 
+          // Scroll adjustments
           useEffect(() => {
             if (navState.zone === 'content') {
                const el = document.getElementById(`channel-${navState.contentRow}-${navState.contentCol}`);
@@ -399,7 +448,6 @@ https://skynewsau-live.akamaized.net/hls/live/2002689/skynewsau-extra1/master.m3
               setImportError('');
               
               let m3uText = newPlContent;
-              
               if (newPlContent.trim().startsWith('http://') || newPlContent.trim().startsWith('https://')) {
                   try {
                       const response = await fetch(newPlContent.trim());
@@ -429,104 +477,104 @@ https://skynewsau-live.akamaized.net/hls/live/2002689/skynewsau-extra1/master.m3
              return <PlayerView channel={playingChannel} onBack={() => setPlayingChannel(null)} />;
           }
 
+          // Roku UI Twilight Gradient Background styling
           return (
-            <div className="flex h-screen bg-[#0f111a] text-white font-sans overflow-hidden select-none">
+            <div className={`flex h-screen w-screen overflow-hidden select-none transition-colors duration-1000 ${mouseHidden ? 'cursor-none' : ''}`}
+                 style={{ background: 'linear-gradient(135deg, #180933 0%, #3e0b4a 40%, #7d1c53 75%, #cf4c3b 100%)' }}>
+              
               <style>{`
                 .scrollbar-hide::-webkit-scrollbar { display: none; }
                 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-                @keyframes fadeIn { from { opacity: 0; } to { opacity: 0.3; } }
-                .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
               `}</style>
+              
+              <Clock />
 
-              {/* --- SIDEBAR --- */}
-              <div className={`fixed left-0 top-0 bottom-0 bg-[#1c1f2e] z-50 transition-all duration-300 flex flex-col ${navState.zone === 'sidebar' ? 'w-72 shadow-2xl shadow-black' : 'w-20'}`}>
-                <div className="p-6 flex items-center justify-center border-b border-white/5 mb-4">
-                   <FuturisticFireLogo className="w-8 h-8 flex-shrink-0" />
-                   {navState.zone === 'sidebar' && (
-                      <span className="ml-4 font-black text-2xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-300 whitespace-nowrap drop-shadow-[0_0_10px_rgba(255,165,0,0.6)]">
-                         FlameTV
-                      </span>
-                   )}
+              {/* --- ROKU STYLE SIDEBAR --- */}
+              <div className="w-[340px] flex-shrink-0 h-full flex flex-col z-50 bg-black/40 backdrop-blur-md shadow-2xl border-r border-white/5 pt-12">
+                <div className="px-10 flex items-center mb-12">
+                   <FuturisticFireLogo className="w-10 h-10 flex-shrink-0" />
+                   <span className="ml-4 font-black text-3xl tracking-tight text-white drop-shadow-md">
+                      FlameTV
+                   </span>
                 </div>
 
-                <div className="flex flex-col flex-1 overflow-y-auto scrollbar-hide space-y-2 px-3 pb-6">
+                <div className="flex flex-col flex-1 overflow-y-auto scrollbar-hide space-y-2 px-6 pb-10">
                    {sidebarItems.map((item, idx) => {
-                       const isFocused = navState.sidebarIndex === idx && navState.zone === 'sidebar';
+                       const isFocused = navState.zone === 'sidebar' && navState.sidebarIndex === idx;
                        const isSelected = selectedSidebarId === item.id;
+                       
+                       // Roku specific styling logic
+                       let styling = 'text-white/70 hover:text-white';
+                       if (isFocused) styling = 'bg-gray-100 text-black font-bold scale-[1.03] shadow-lg';
+                       else if (isSelected) styling = 'text-white font-bold bg-white/10';
+
                        return (
                           <div
                              key={item.id}
                              id={`sidebar-${idx}`}
                              onClick={() => {
                                  setSelectedSidebarId(item.id);
-                                 if (item.id === 'settings') {
+                                 if (['settings'].includes(item.id)) {
                                      setNavState(p => ({ ...p, zone: 'settings', sidebarIndex: idx }));
                                      setTimeout(() => document.getElementById('pl-name')?.focus(), 50);
-                                 } else if (item.id !== 'search') {
+                                 } else if (!['search', 'help', 'about'].includes(item.id)) {
                                      setNavState(p => ({ ...p, zone: 'content', sidebarIndex: idx }));
                                  } else {
                                      setNavState(p => ({ ...p, zone: 'sidebar', sidebarIndex: idx }));
                                  }
                              }}
-                             className={`flex items-center p-4 rounded-xl cursor-pointer transition-all duration-200 ${
-                                isFocused ? 'bg-orange-500 text-white scale-105 shadow-lg' :
-                                isSelected ? 'bg-gray-800 text-orange-400' : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                             }`}
+                             className={`flex items-center px-5 py-4 rounded-lg cursor-pointer transition-all duration-200 ${styling}`}
                           >
-                             <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">{item.icon}</div>
-                             {navState.zone === 'sidebar' && <span className="ml-4 font-bold text-lg whitespace-nowrap">{item.label}</span>}
+                             {/* Hide icon if it's a playlist item to mimic Roku clean text list, otherwise show */}
+                             {['search', 'home', 'settings', 'help', 'about'].includes(item.id) && (
+                                <div className="w-6 h-6 flex items-center justify-center flex-shrink-0 mr-4">{item.icon}</div>
+                             )}
+                             <span className="text-xl tracking-wide whitespace-nowrap">{item.label}</span>
                           </div>
                        )
                    })}
                 </div>
-                
-                {/* TV Instructions visible only when sidebar expanded */}
-                <div className={`p-6 bg-black/20 text-gray-500 text-xs font-bold tracking-widest uppercase transition-opacity duration-300 ${navState.zone === 'sidebar' ? 'opacity-100' : 'opacity-0'}`}>
-                   <div className="flex items-center mb-3"><span className="bg-gray-800 px-2 py-1 rounded-md mr-3 border border-gray-700 text-white">Arrows</span> Navigate</div>
-                   <div className="flex items-center mb-3"><span className="bg-gray-800 px-2 py-1 rounded-md mr-3 border border-gray-700 text-white">Enter</span> Select</div>
-                   <div className="flex items-center"><span className="bg-gray-800 px-2 py-1 rounded-md mr-3 border border-gray-700 text-white">Esc</span> Back</div>
-                </div>
               </div>
 
               {/* --- MAIN CONTENT AREA --- */}
-              <div className="ml-20 flex-1 h-screen flex flex-col relative overflow-hidden transition-all duration-300">
+              <div className="flex-1 h-screen flex flex-col relative overflow-hidden transition-all duration-300 pl-10 pr-16 pt-24 pb-12">
                  
-                 {/* Settings & Import View */}
+                 {/* Settings View */}
                  {selectedSidebarId === 'settings' && (
-                     <div className="p-16 w-full h-full overflow-y-auto scrollbar-hide">
-                         <h2 className="text-4xl font-black mb-10 text-white">Settings & Import</h2>
-                         <div className="bg-gray-800/50 p-8 rounded-3xl border border-white/5 max-w-3xl">
-                            <h3 className="text-2xl font-bold mb-6 text-orange-500">Add New Playlist</h3>
+                     <div className="w-full h-full overflow-y-auto scrollbar-hide pr-8">
+                         <h2 className="text-5xl font-light mb-10 text-white drop-shadow-md">Settings</h2>
+                         <div className="bg-black/30 backdrop-blur-xl p-10 rounded-2xl border border-white/10 max-w-4xl shadow-2xl">
+                            <h3 className="text-2xl font-bold mb-6 text-white">Add New Playlist</h3>
                             <div className="space-y-6">
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Playlist Name</label>
-                                    <input id="pl-name" type="text" className="w-full bg-gray-900 border border-gray-700 rounded-xl p-4 text-white font-semibold focus:ring-4 focus:ring-orange-500 outline-none transition-all" placeholder="e.g., My Sports Streams" value={newPlName} onChange={e => setNewPlName(e.target.value)} />
+                                    <label className="block text-sm font-bold text-gray-300 uppercase tracking-wider mb-2">Playlist Name</label>
+                                    <input id="pl-name" type="text" className="w-full bg-black/50 border border-white/20 rounded-xl p-4 text-white font-semibold focus:ring-4 focus:ring-orange-500 outline-none transition-all" placeholder="e.g., My Sports Streams" value={newPlName} onChange={e => setNewPlName(e.target.value)} />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Paste raw M3U / M3U8 Content OR a URL</label>
-                                    <textarea className="w-full h-48 bg-gray-900 border border-gray-700 rounded-xl p-4 text-gray-300 font-mono text-sm focus:ring-4 focus:ring-orange-500 outline-none transition-all resize-none" placeholder="https://example.com/playlist.m3u&#10;OR&#10;#EXTM3U&#10;#EXTINF:-1 tvg-name=..." value={newPlContent} onChange={e => setNewPlContent(e.target.value)} />
+                                    <label className="block text-sm font-bold text-gray-300 uppercase tracking-wider mb-2">Paste raw M3U / M3U8 Content OR a URL</label>
+                                    <textarea className="w-full h-48 bg-black/50 border border-white/20 rounded-xl p-4 text-white font-mono text-sm focus:ring-4 focus:ring-orange-500 outline-none transition-all resize-none" placeholder="https://example.com/playlist.m3u&#10;OR&#10;#EXTM3U&#10;#EXTINF:-1 tvg-name=..." value={newPlContent} onChange={e => setNewPlContent(e.target.value)} />
                                 </div>
-                                {importError && <p className="text-red-500 font-bold bg-red-500/10 p-4 rounded-xl border border-red-500/20">{importError}</p>}
+                                {importError && <p className="text-red-400 font-bold bg-red-900/40 p-4 rounded-xl border border-red-500/30">{importError}</p>}
                                 <button 
-                                   className="bg-orange-500 hover:bg-orange-600 disabled:bg-gray-700 disabled:text-gray-400 text-white font-bold text-lg py-4 px-8 rounded-xl focus:ring-4 focus:ring-white outline-none transition-all shadow-lg flex justify-center items-center w-max" 
+                                   className="bg-gray-100 hover:bg-white text-black font-bold text-lg py-4 px-10 rounded-xl focus:ring-4 focus:ring-orange-500 outline-none transition-all shadow-xl flex items-center justify-center disabled:opacity-50" 
                                    onClick={handleImport} 
                                    disabled={isImporting}
                                 >
-                                    {isImporting && <Loader2 className="animate-spin w-6 h-6 mr-2" />}
-                                    {isImporting ? 'Importing...' : 'Import Playlist'}
+                                    {isImporting && <Loader2 className="animate-spin w-6 h-6 mr-3" />}
+                                    {isImporting ? 'Importing...' : 'Save list'}
                                 </button>
                             </div>
                          </div>
 
-                         <div className="mt-12 max-w-3xl">
-                             <h3 className="text-2xl font-bold mb-6 text-white">Active Playlists</h3>
+                         <div className="mt-12 max-w-4xl">
+                             <h3 className="text-2xl font-bold mb-6 text-white drop-shadow-md">Active Playlists</h3>
                              {playlists.map(pl => (
-                                <div key={pl.id} className="flex items-center justify-between bg-gray-800/80 border border-white/5 p-6 rounded-2xl mb-4">
+                                <div key={pl.id} className="flex items-center justify-between bg-black/30 backdrop-blur-md border border-white/10 p-6 rounded-2xl mb-4 shadow-lg">
                                    <div>
-                                       <h4 className="font-bold text-xl">{pl.name}</h4>
-                                       <p className="text-gray-400 font-semibold">{pl.channels.length} channels loaded</p>
+                                       <h4 className="font-bold text-2xl text-white">{pl.name}</h4>
+                                       <p className="text-white/60 font-semibold">{pl.channels.length} channels loaded</p>
                                    </div>
-                                   <button className="text-gray-500 hover:text-red-400 p-3 bg-gray-900 rounded-xl focus:ring-4 focus:ring-white outline-none transition-all" onClick={() => setPlaylists(p => p.filter(x => x.id !== pl.id))}>
+                                   <button className="text-white/40 hover:text-red-400 p-4 bg-black/50 rounded-xl focus:ring-4 focus:ring-orange-500 outline-none transition-all" onClick={() => setPlaylists(p => p.filter(x => x.id !== pl.id))}>
                                       <Trash2 size={24} />
                                    </button>
                                 </div>
@@ -535,99 +583,103 @@ https://skynewsau-live.akamaized.net/hls/live/2002689/skynewsau-extra1/master.m3
                      </div>
                  )}
 
+                 {/* Help View */}
+                 {selectedSidebarId === 'help' && (
+                     <div className="w-full h-full overflow-y-auto scrollbar-hide pr-8 flex flex-col items-start">
+                         <h2 className="text-5xl font-light mb-10 text-white drop-shadow-md">Help & Controls</h2>
+                         <div className="bg-black/30 backdrop-blur-xl p-10 rounded-2xl border border-white/10 max-w-3xl shadow-2xl w-full">
+                            <h3 className="text-2xl font-bold mb-8 text-orange-400">Keyboard Shortcuts</h3>
+                            <div className="space-y-6">
+                                <div className="flex items-center"><span className="bg-white text-black font-bold px-4 py-2 rounded-lg shadow-md mr-6 min-w-[100px] text-center">Arrows</span> <span className="text-xl text-white/90">Navigate interfaces and menus</span></div>
+                                <div className="flex items-center"><span className="bg-white text-black font-bold px-4 py-2 rounded-lg shadow-md mr-6 min-w-[100px] text-center">Enter</span> <span className="text-xl text-white/90">Select item / Open Channel</span></div>
+                                <div className="flex items-center"><span className="bg-white text-black font-bold px-4 py-2 rounded-lg shadow-md mr-6 min-w-[100px] text-center">Esc / Back</span> <span className="text-xl text-white/90">Go back / Close video player</span></div>
+                                <div className="flex items-center"><span className="bg-white text-black font-bold px-4 py-2 rounded-lg shadow-md mr-6 min-w-[100px] text-center">Spacebar</span> <span className="text-xl text-white/90">Play / Pause video stream</span></div>
+                            </div>
+                         </div>
+                     </div>
+                 )}
+
+                 {/* About View */}
+                 {selectedSidebarId === 'about' && (
+                     <div className="w-full h-full flex flex-col items-center justify-center text-center">
+                         <FuturisticFireLogo className="w-48 h-48 mb-8" />
+                         <h2 className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-300 to-yellow-100 tracking-tight drop-shadow-2xl mb-4">FlameTV</h2>
+                         <p className="text-2xl text-white/80 font-light mb-8 max-w-xl">A futuristic, web-based, zero-dependency IPTV player designed for the 10-foot TV experience.</p>
+                         
+                         <div className="bg-black/40 backdrop-blur-md px-10 py-6 rounded-2xl border border-white/10 shadow-2xl">
+                             <p className="text-lg text-white/70 mb-2">Created by</p>
+                             <p className="text-3xl font-bold text-white tracking-wide">Tekken (Hammad Ahmed)</p>
+                         </div>
+                         <p className="text-white/40 mt-12">&copy; 2026 All Rights Reserved.</p>
+                     </div>
+                 )}
+
                  {/* Grid / Dashboard View */}
-                 {selectedSidebarId !== 'settings' && (
-                    <>
-                       {/* Hero Banner */}
-                       <div className="relative h-[45vh] w-full flex-shrink-0 bg-black">
-                          <div className="absolute inset-0 bg-gradient-to-r from-[#0f111a] via-[#0f111a]/80 to-transparent z-10" />
-                          <div className="absolute inset-0 bg-gradient-to-t from-[#0f111a] via-transparent to-transparent z-10" />
-                          
-                          {heroChannel?.logo && (
-                              <img key={heroChannel.id} src={heroChannel.logo} className="absolute right-0 top-0 w-3/4 h-full object-cover animate-fade-in" alt="" />
-                          )}
+                 {!['settings', 'help', 'about'].includes(selectedSidebarId) && (
+                    <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide z-20 pr-8">
+                       
+                       {/* Animated Home Banner for 'Home' tab */}
+                       {selectedSidebarId === 'home' && <AnimatedHomeBanner />}
 
-                          <div className="absolute bottom-12 left-16 z-20 flex flex-col space-y-5 max-w-3xl">
-                             {heroChannel?.logo && (
-                                 <div className="w-24 h-24 bg-white/5 p-2 rounded-2xl backdrop-blur-md border border-white/10 shadow-2xl">
-                                     <img src={heroChannel.logo} className="w-full h-full object-contain" />
-                                 </div>
-                             )}
-                             <h1 className="text-6xl font-black text-white tracking-tight drop-shadow-2xl">
-                                 {heroChannel?.name || (contentRows.length === 0 ? 'No Channels' : 'Select a Channel')}
-                             </h1>
-                             <div className="flex items-center space-x-4">
-                                 {heroChannel?.group && (
-                                    <span className="px-4 py-1.5 bg-orange-500 text-white text-sm font-bold rounded-lg uppercase tracking-widest shadow-lg shadow-orange-500/30">
-                                        {heroChannel.group}
-                                    </span>
-                                 )}
-                                 <span className="px-4 py-1.5 bg-white/10 text-white text-sm font-bold rounded-lg backdrop-blur-md uppercase tracking-widest">
-                                     LIVE TV
-                                 </span>
-                             </div>
-                          </div>
-                       </div>
-
-                       {/* Channel Rows */}
-                       <div className="flex-1 overflow-y-auto overflow-x-hidden pb-32 scrollbar-hide -mt-4 z-20">
-                          {contentRows.length === 0 ? (
-                              <div className="flex flex-col items-center justify-center mt-20 text-gray-600">
-                                  <Flame className="w-32 h-32 mb-6 opacity-20" />
-                                  <h2 className="text-3xl font-black mb-2 text-gray-500">Playlist is Empty</h2>
-                                  <p className="font-semibold">Go to Settings & Import to add M3U channels.</p>
-                              </div>
-                          ) : (
-                              contentRows.map((row, rIdx) => (
-                                 <div key={rIdx} className="mb-10">
-                                    <h3 className="text-2xl font-bold text-white mb-4 px-16 tracking-wide">{row.title}</h3>
-                                    <div className="flex px-16 space-x-5 overflow-x-hidden pt-4 pb-8">
-                                       {row.channels.map((ch, cIdx) => {
-                                           const isFocused = navState.zone === 'content' && navState.contentRow === rIdx && navState.contentCol === cIdx;
-                                           return (
-                                              <div
-                                                 key={ch.id}
-                                                 id={`channel-${rIdx}-${cIdx}`}
-                                                 onClick={() => {
-                                                    setNavState(p => ({ ...p, zone: 'content', contentRow: rIdx, contentCol: cIdx }));
-                                                    setPlayingChannel(ch);
-                                                 }}
-                                                 className={`relative flex-shrink-0 w-72 h-40 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 ${
-                                                    isFocused ? 'ring-4 ring-orange-500 scale-110 z-10 shadow-2xl shadow-orange-500/40 bg-gray-700' : 'opacity-60 hover:opacity-100 bg-gray-800 border border-white/5'
-                                                 }`}
-                                              >
-                                                 {ch.logo ? (
-                                                    <div className="w-full h-full bg-black/40 flex items-center justify-center p-6">
-                                                        <img src={ch.logo} alt={ch.name} className="max-w-full max-h-full object-contain" />
-                                                    </div>
-                                                 ) : (
-                                                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900 p-6">
-                                                        <span className="text-gray-400 font-black text-2xl text-center leading-tight">{ch.name}</span>
-                                                    </div>
-                                                 )}
-                                                 
-                                                 {/* Gradient Overlay for Title */}
-                                                 <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black via-black/80 to-transparent p-4 pt-12">
-                                                    <p className="text-white font-bold truncate text-base">{ch.name}</p>
+                       {contentRows.length === 0 ? (
+                           <div className="flex flex-col items-center justify-center mt-32 text-white/50">
+                               <Flame className="w-32 h-32 mb-6 opacity-40" />
+                               <h2 className="text-4xl font-light mb-4 text-white">Playlist is Empty</h2>
+                               <p className="text-xl font-semibold">Navigate to Settings to load your M3U streams.</p>
+                           </div>
+                       ) : (
+                           contentRows.map((row, rIdx) => (
+                              <div key={rIdx} className="mb-12">
+                                 <h3 className="text-2xl font-bold text-white mb-6 drop-shadow-md tracking-wide">{row.title}</h3>
+                                 <div className="flex space-x-6 overflow-x-hidden pb-8 pt-2">
+                                    {row.channels.map((ch, cIdx) => {
+                                        const isFocused = navState.zone === 'content' && navState.contentRow === rIdx && navState.contentCol === cIdx;
+                                        return (
+                                           <div
+                                              key={ch.id}
+                                              id={`channel-${rIdx}-${cIdx}`}
+                                              onClick={() => {
+                                                 setNavState(p => ({ ...p, zone: 'content', contentRow: rIdx, contentCol: cIdx }));
+                                                 setPlayingChannel(ch);
+                                              }}
+                                              className={`relative flex-shrink-0 w-80 h-48 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 shadow-xl ${
+                                                 isFocused ? 'ring-[5px] ring-white scale-110 z-10 shadow-[0_15px_40px_rgba(0,0,0,0.6)]' : 'opacity-80 hover:opacity-100 hover:scale-105 border border-white/10'
+                                              }`}
+                                           >
+                                              {/* Beautiful Initials Background or Image Cover */}
+                                              {ch.logo ? (
+                                                 <div className="relative w-full h-full overflow-hidden bg-black flex items-center justify-center">
+                                                     {/* Blurred Backdrop for images that aren't perfectly 16:9 */}
+                                                     <img src={ch.logo} className="absolute inset-0 w-full h-full object-cover blur-[20px] opacity-60 scale-125" alt=""/>
+                                                     <img src={ch.logo} alt={ch.name} className="relative z-10 w-full h-full object-contain p-2 drop-shadow-2xl" />
                                                  </div>
-
-                                                 {/* Play Icon overlay when focused */}
-                                                 {isFocused && (
-                                                    <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 hover:opacity-100 transition-opacity">
-                                                       <div className="bg-orange-500 rounded-full p-3 shadow-lg">
-                                                          <Play className="w-8 h-8 text-white fill-current ml-1" />
-                                                       </div>
-                                                    </div>
-                                                 )}
+                                              ) : (
+                                                 <div className={`w-full h-full bg-gradient-to-br ${getGradient(ch.name)} flex items-center justify-center relative overflow-hidden`}>
+                                                     <span className="text-8xl font-black text-white mix-blend-overlay opacity-30 select-none scale-125">{getInitials(ch.name)}</span>
+                                                 </div>
+                                              )}
+                                              
+                                              {/* Constant Sleek Overlay for Title */}
+                                              <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-5 pt-16 z-20">
+                                                 <p className="text-white font-bold truncate text-lg drop-shadow-md">{ch.name}</p>
                                               </div>
-                                           )
-                                       })}
-                                    </div>
+
+                                              {/* Play Icon overlay when focused */}
+                                              {isFocused && (
+                                                 <div className="absolute inset-0 flex items-center justify-center bg-black/20 z-30 opacity-0 hover:opacity-100 transition-opacity">
+                                                    <div className="bg-white rounded-full p-4 shadow-2xl">
+                                                       <Play className="w-8 h-8 text-black fill-current ml-1" />
+                                                    </div>
+                                                 </div>
+                                              )}
+                                           </div>
+                                        )
+                                    })}
                                  </div>
-                              ))
-                          )}
-                       </div>
-                    </>
+                              </div>
+                           ))
+                       )}
+                    </div>
                  )}
               </div>
             </div>

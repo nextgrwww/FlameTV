@@ -1,0 +1,575 @@
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { Flame, Search, Home, List, Settings, Trash2, Loader2, AlertCircle, ArrowLeft, Play } from 'lucide-react';
+
+// --- SAMPLE DATA ---
+const SAMPLE_M3U = `#EXTM3U
+#EXTINF:-1 tvg-id="" tvg-name="NASA TV" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/e/e5/NASA_logo.svg" group-title="Science",NASA TV
+https://ntv1.akamaized.net/hls/live/2014075/NASA-NTV1-HLS/master.m3u8
+#EXTINF:-1 tvg-id="" tvg-name="Red Bull TV" tvg-logo="https://upload.wikimedia.org/wikipedia/en/thumb/f/f5/Red_Bull_TV_logo.svg/1200px-Red_Bull_TV_logo.svg.png" group-title="Sports",Red Bull TV
+https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8
+#EXTINF:-1 tvg-id="" tvg-name="Al Jazeera English" tvg-logo="https://upload.wikimedia.org/wikipedia/en/thumb/f/f2/Al_Jazeera_English_logo.svg/1200px-Al_Jazeera_English_logo.svg.png" group-title="News",Al Jazeera English
+https://live-hls-web-aje.getaj.net/AJE/index.m3u8
+#EXTINF:-1 tvg-id="" tvg-name="Sky News" tvg-logo="https://upload.wikimedia.org/wikipedia/en/thumb/e/e4/Sky_News_logo.svg/1200px-Sky_News_logo.svg.png" group-title="News",Sky News
+https://skynewsau-live.akamaized.net/hls/live/2002689/skynewsau-extra1/master.m3u8`;
+
+// --- UTILS ---
+const genId = () => Math.random().toString(36).substring(2, 9) + Date.now().toString(36);
+
+const parseM3U = (text) => {
+  const lines = text.split(/\r?\n/);
+  const channels = [];
+  let currentChannel = null;
+
+  lines.forEach(line => {
+    line = line.trim();
+    if (!line) return;
+
+    if (line.startsWith('#EXTINF:')) {
+      const logoMatch = line.match(/tvg-logo="([^"]*)"/);
+      const groupMatch = line.match(/group-title="([^"]*)"/);
+      const nameParts = line.split(',');
+      const nameMatch = nameParts[nameParts.length - 1];
+
+      currentChannel = {
+        id: genId(),
+        name: nameMatch ? nameMatch.trim() : 'Unknown Channel',
+        logo: logoMatch ? logoMatch[1] : null,
+        group: groupMatch ? groupMatch[1] : 'Uncategorized',
+      };
+    } else if (!line.startsWith('#') && currentChannel) {
+      // If line doesn't start with '#', it's the stream URL for the active channel
+      currentChannel.url = line;
+      channels.push(currentChannel);
+      currentChannel = null; // Reset for next
+    }
+  });
+  return channels;
+};
+
+// --- VIDEO PLAYER COMPONENT ---
+const PlayerView = ({ channel, onBack }) => {
+  const videoRef = useRef(null);
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [showControls, setShowControls] = useState(true);
+
+  // Initialize HLS
+  useEffect(() => {
+    let hls;
+    const initPlayer = () => {
+      if (!videoRef.current) return;
+      if (window.Hls.isSupported()) {
+        hls = new window.Hls({ maxBufferLength: 30, liveSyncDurationCount: 3 });
+        hls.loadSource(channel.url);
+        hls.attachMedia(videoRef.current);
+        hls.on(window.Hls.Events.MANIFEST_PARSED, () => {
+          setLoading(false);
+          videoRef.current.play().catch(() => console.log("Autoplay prevented"));
+        });
+        hls.on(window.Hls.Events.ERROR, (event, data) => {
+          if (data.fatal) {
+             setError(true); setLoading(false);
+          }
+        });
+      } else if (videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
+        // Native support (Safari)
+        videoRef.current.src = channel.url;
+        videoRef.current.addEventListener('loadedmetadata', () => {
+           setLoading(false);
+           videoRef.current.play().catch(() => console.log("Autoplay prevented"));
+        });
+        videoRef.current.addEventListener('error', () => {
+           setError(true); setLoading(false);
+        });
+      }
+    };
+
+    if (!window.Hls) {
+       const script = document.createElement('script');
+       script.src = 'https://cdn.jsdelivr.net/npm/hls.js@1';
+       script.onload = initPlayer;
+       document.head.appendChild(script);
+    } else {
+       initPlayer();
+    }
+
+    return () => { if (hls) hls.destroy(); };
+  }, [channel]);
+
+  // Controls UI timeout & Keyboard Shortcuts
+  useEffect(() => {
+     let timer;
+     const resetTimer = () => {
+        setShowControls(true);
+        clearTimeout(timer);
+        timer = setTimeout(() => setShowControls(false), 4000);
+     };
+
+     const handleKey = (e) => {
+        resetTimer();
+        if (e.key === 'Escape' || e.key === 'Backspace') {
+           onBack();
+        } else if (e.key === ' ' || e.key === 'MediaPlayPause') {
+           if (videoRef.current) {
+              if (videoRef.current.paused) videoRef.current.play();
+              else videoRef.current.pause();
+           }
+        }
+     };
+
+     window.addEventListener('mousemove', resetTimer);
+     window.addEventListener('keydown', handleKey);
+     resetTimer();
+     return () => {
+        window.removeEventListener('mousemove', resetTimer);
+        window.removeEventListener('keydown', handleKey);
+        clearTimeout(timer);
+     }
+  }, [onBack]);
+
+  return (
+    <div className="fixed inset-0 bg-black z-[100] flex items-center justify-center">
+       {loading && <div className="absolute z-10 text-white flex flex-col items-center"><Loader2 className="animate-spin w-12 h-12 mb-4 text-orange-500" />Tuning in...</div>}
+       {error && <div className="absolute z-10 text-white flex flex-col items-center"><AlertCircle className="w-12 h-12 mb-4 text-red-500" />Stream Offline or Invalid URL.</div>}
+
+       <video ref={videoRef} className="w-full h-full object-contain" />
+
+       <div className={`absolute inset-0 pointer-events-none transition-opacity duration-500 ${showControls ? 'opacity-100' : 'opacity-0'}`}>
+          <div className="absolute inset-x-0 top-0 bg-gradient-to-b from-black/90 pb-16 pt-8 px-10 to-transparent">
+             <button onClick={onBack} className="pointer-events-auto flex items-center text-white/70 hover:text-white transition-colors mb-4">
+                 <ArrowLeft className="w-8 h-8 mr-2" /> <span className="text-xl font-bold">Back</span>
+             </button>
+             <h2 className="text-5xl font-black text-white tracking-tight">{channel.name}</h2>
+             <span className="text-orange-500 font-bold text-lg uppercase tracking-widest mt-2 block">{channel.group}</span>
+          </div>
+       </div>
+    </div>
+  );
+};
+
+const FuturisticFireLogo = ({ className }) => (
+  <div className={`relative flex items-center justify-center ${className}`}>
+     <div className="absolute inset-0 bg-orange-600 blur-lg rounded-full animate-pulse opacity-60"></div>
+     <Flame className="relative z-10 text-orange-400 w-full h-full drop-shadow-[0_0_15px_rgba(255,165,0,1)]" />
+     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/2 h-1/2 bg-yellow-300 blur-md rounded-full animate-ping opacity-40"></div>
+  </div>
+);
+
+// --- MAIN APP VIEW ---
+export default function App() {
+  const [playlists, setPlaylists] = useState([
+    { id: 'sample', name: 'Global News & Space', channels: parseM3U(SAMPLE_M3U) }
+  ]);
+
+  // View & Navigation State
+  const [selectedSidebarId, setSelectedSidebarId] = useState('home');
+  const [playingChannel, setPlayingChannel] = useState(null);
+  
+  // Spatial TV Navigation state
+  const [navState, setNavState] = useState({
+     zone: 'sidebar', // 'sidebar', 'content', 'settings'
+     sidebarIndex: 1, // index 1 is Home
+     contentRow: 0,
+     contentCol: 0
+  });
+
+  const [heroChannel, setHeroChannel] = useState(null);
+
+  // Settings State
+  const [newPlName, setNewPlName] = useState('');
+  const [newPlContent, setNewPlContent] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
+  const [importError, setImportError] = useState('');
+
+  // Derived Data
+  const sidebarItems = useMemo(() => {
+    return [
+      { id: 'search', icon: <Search size={24}/>, label: 'Search' },
+      { id: 'home', icon: <Home size={24}/>, label: 'All Channels' },
+      ...playlists.map(p => ({ id: p.id, icon: <List size={24}/>, label: p.name })),
+      { id: 'settings', icon: <Settings size={24}/>, label: 'Settings & Import' }
+    ];
+  }, [playlists]);
+
+  const contentRows = useMemo(() => {
+     let allChannels = [];
+     if (selectedSidebarId === 'home') {
+        allChannels = playlists.flatMap(p => p.channels);
+     } else if (selectedSidebarId !== 'settings') {
+        const pl = playlists.find(p => p.id === selectedSidebarId);
+        if (pl) allChannels = pl.channels;
+     }
+
+     // Group by category
+     const grouped = allChannels.reduce((acc, ch) => {
+        if (!acc[ch.group]) acc[ch.group] = [];
+        acc[ch.group].push(ch);
+        return acc;
+     }, {});
+
+     return Object.entries(grouped).map(([title, channels]) => ({ title, channels }));
+  }, [playlists, selectedSidebarId]);
+
+  // Update Hero section when navigating the grid
+  useEffect(() => {
+     if (navState.zone === 'content' && contentRows.length > 0) {
+        const row = contentRows[navState.contentRow];
+        if (row && row.channels) setHeroChannel(row.channels[navState.contentCol]);
+     } else if (navState.zone === 'sidebar' && contentRows.length > 0) {
+        // Just show the first channel of the selected category if idling on sidebar
+        setHeroChannel(contentRows[0]?.channels[0]);
+     } else if (selectedSidebarId === 'settings') {
+        setHeroChannel(null);
+     }
+  }, [navState, contentRows, selectedSidebarId]);
+
+  // TV SPATIAL NAVIGATION LOGIC (The Core "FlameTV" Feel)
+  useEffect(() => {
+    if (playingChannel) return;
+
+    const handleNav = (e) => {
+      // Allow default behavior for form inputs in settings
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+          if (e.key === 'Escape') {
+              e.target.blur();
+              setNavState(p => ({ ...p, zone: 'sidebar' }));
+          }
+          return; 
+      }
+
+      // Prevent window scrolling for navigation keys
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+          e.preventDefault();
+      }
+
+      setNavState(prev => {
+          let { zone, sidebarIndex, contentRow, contentCol } = prev;
+
+          if (zone === 'sidebar') {
+              switch(e.key) {
+                  case 'ArrowUp': sidebarIndex = Math.max(0, sidebarIndex - 1); break;
+                  case 'ArrowDown': sidebarIndex = Math.min(sidebarItems.length - 1, sidebarIndex + 1); break;
+                  case 'ArrowRight':
+                      if (selectedSidebarId === 'settings') {
+                          zone = 'settings';
+                          setTimeout(() => document.getElementById('pl-name')?.focus(), 50);
+                      } else if (contentRows.length > 0) {
+                          zone = 'content';
+                          contentRow = Math.min(contentRow, contentRows.length - 1);
+                          contentCol = Math.min(contentCol, contentRows[contentRow].channels.length - 1);
+                      }
+                      break;
+                  case 'Enter':
+                      const targetId = sidebarItems[sidebarIndex].id;
+                      setSelectedSidebarId(targetId);
+                      if (targetId !== 'settings' && targetId !== 'search') {
+                          zone = 'content';
+                          contentRow = 0;
+                          contentCol = 0;
+                      } else if (targetId === 'settings') {
+                          zone = 'settings';
+                          setTimeout(() => document.getElementById('pl-name')?.focus(), 50);
+                      }
+                      break;
+              }
+          } else if (zone === 'content') {
+              if (contentRows.length === 0) return prev;
+              switch(e.key) {
+                  case 'ArrowUp':
+                      if (contentRow > 0) {
+                          contentRow--;
+                          contentCol = Math.min(contentCol, contentRows[contentRow].channels.length - 1);
+                      }
+                      break;
+                  case 'ArrowDown':
+                      if (contentRow < contentRows.length - 1) {
+                          contentRow++;
+                          contentCol = Math.min(contentCol, contentRows[contentRow].channels.length - 1);
+                      }
+                      break;
+                  case 'ArrowLeft':
+                      if (contentCol > 0) contentCol--;
+                      else zone = 'sidebar';
+                      break;
+                  case 'ArrowRight':
+                      if (contentCol < contentRows[contentRow].channels.length - 1) contentCol++;
+                      break;
+                  case 'Enter':
+                      setPlayingChannel(contentRows[contentRow].channels[contentCol]);
+                      break;
+                  case 'Escape':
+                  case 'Backspace':
+                      zone = 'sidebar';
+                      break;
+              }
+          } else if (zone === 'settings') {
+             if (e.key === 'Escape' || e.key === 'ArrowLeft') {
+                 zone = 'sidebar';
+             }
+          }
+          return { zone, sidebarIndex, contentRow, contentCol };
+      });
+    };
+
+    window.addEventListener('keydown', handleNav);
+    return () => window.removeEventListener('keydown', handleNav);
+  }, [playingChannel, contentRows, sidebarItems, selectedSidebarId]);
+
+  // Smooth Scrolling to focused item
+  useEffect(() => {
+    if (navState.zone === 'content') {
+       const el = document.getElementById(`channel-${navState.contentRow}-${navState.contentCol}`);
+       if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+    } else if (navState.zone === 'sidebar') {
+       const el = document.getElementById(`sidebar-${navState.sidebarIndex}`);
+       if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [navState]);
+
+  // Reset content indices when changing sidebar selection
+  useEffect(() => {
+     setNavState(p => ({ ...p, contentRow: 0, contentCol: 0 }));
+  }, [selectedSidebarId]);
+
+
+  const handleImport = async () => {
+      if (!newPlName || !newPlContent) return;
+      setIsImporting(true);
+      setImportError('');
+      
+      let m3uText = newPlContent;
+      
+      // Check if user pasted a URL instead of raw text
+      if (newPlContent.trim().startsWith('http://') || newPlContent.trim().startsWith('https://')) {
+          try {
+              const response = await fetch(newPlContent.trim());
+              if (!response.ok) throw new Error('Failed to fetch playlist');
+              m3uText = await response.text();
+          } catch (err) {
+              setImportError('Could not load URL. It might be blocked by CORS or invalid.');
+              setIsImporting(false);
+              return;
+          }
+      }
+
+      const parsedChannels = parseM3U(m3uText);
+      if (parsedChannels.length === 0) {
+          setImportError('No channels found. Ensure it is a valid M3U file.');
+          setIsImporting(false);
+          return;
+      }
+
+      setPlaylists(prev => [...prev, { id: genId(), name: newPlName, channels: parsedChannels }]);
+      setNewPlName(''); setNewPlContent('');
+      setIsImporting(false);
+      setNavState(p => ({ ...p, zone: 'sidebar' })); // Return focus to sidebar after import
+  };
+
+  if (playingChannel) {
+     return <PlayerView channel={playingChannel} onBack={() => setPlayingChannel(null)} />;
+  }
+
+  return (
+    <div className="flex h-screen bg-[#0f111a] text-white font-sans overflow-hidden select-none">
+      <style>{`
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 0.3; } }
+        .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
+      `}</style>
+
+      {/* --- SIDEBAR --- */}
+      <div className={`fixed left-0 top-0 bottom-0 bg-[#1c1f2e] z-50 transition-all duration-300 flex flex-col ${navState.zone === 'sidebar' ? 'w-72 shadow-2xl shadow-black' : 'w-20'}`}>
+        <div className="p-6 flex items-center justify-center border-b border-white/5 mb-4">
+           <FuturisticFireLogo className="w-8 h-8 flex-shrink-0" />
+           {navState.zone === 'sidebar' && (
+              <span className="ml-4 font-black text-2xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-300 whitespace-nowrap drop-shadow-[0_0_10px_rgba(255,165,0,0.6)]">
+                 FlameTV
+              </span>
+           )}
+        </div>
+
+        <div className="flex flex-col flex-1 overflow-y-auto scrollbar-hide space-y-2 px-3 pb-6">
+           {sidebarItems.map((item, idx) => {
+               const isFocused = navState.sidebarIndex === idx && navState.zone === 'sidebar';
+               const isSelected = selectedSidebarId === item.id;
+               return (
+                  <div
+                     key={item.id}
+                     id={`sidebar-${idx}`}
+                     onClick={() => {
+                         setSelectedSidebarId(item.id);
+                         if (item.id === 'settings') {
+                             setNavState(p => ({ ...p, zone: 'settings', sidebarIndex: idx }));
+                             setTimeout(() => document.getElementById('pl-name')?.focus(), 50);
+                         } else if (item.id !== 'search') {
+                             setNavState(p => ({ ...p, zone: 'content', sidebarIndex: idx }));
+                         } else {
+                             setNavState(p => ({ ...p, zone: 'sidebar', sidebarIndex: idx }));
+                         }
+                     }}
+                     className={`flex items-center p-4 rounded-xl cursor-pointer transition-all duration-200 ${
+                        isFocused ? 'bg-orange-500 text-white scale-105 shadow-lg' :
+                        isSelected ? 'bg-gray-800 text-orange-400' : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                     }`}
+                  >
+                     <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">{item.icon}</div>
+                     {navState.zone === 'sidebar' && <span className="ml-4 font-bold text-lg whitespace-nowrap">{item.label}</span>}
+                  </div>
+               )
+           })}
+        </div>
+        
+        {/* TV Instructions visible only when sidebar expanded */}
+        <div className={`p-6 bg-black/20 text-gray-500 text-xs font-bold tracking-widest uppercase transition-opacity duration-300 ${navState.zone === 'sidebar' ? 'opacity-100' : 'opacity-0'}`}>
+           <div className="flex items-center mb-3"><span className="bg-gray-800 px-2 py-1 rounded-md mr-3 border border-gray-700 text-white">Arrows</span> Navigate</div>
+           <div className="flex items-center mb-3"><span className="bg-gray-800 px-2 py-1 rounded-md mr-3 border border-gray-700 text-white">Enter</span> Select</div>
+           <div className="flex items-center"><span className="bg-gray-800 px-2 py-1 rounded-md mr-3 border border-gray-700 text-white">Esc</span> Back</div>
+        </div>
+      </div>
+
+      {/* --- MAIN CONTENT AREA --- */}
+      <div className="ml-20 flex-1 h-screen flex flex-col relative overflow-hidden transition-all duration-300">
+         
+         {/* Settings & Import View */}
+         {selectedSidebarId === 'settings' && (
+             <div className="p-16 w-full h-full overflow-y-auto scrollbar-hide">
+                 <h2 className="text-4xl font-black mb-10 text-white">Settings & Import</h2>
+                 <div className="bg-gray-800/50 p-8 rounded-3xl border border-white/5 max-w-3xl">
+                    <h3 className="text-2xl font-bold mb-6 text-orange-500">Add New Playlist</h3>
+                    <div className="space-y-6">
+                        <div>
+                            <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Playlist Name</label>
+                            <input id="pl-name" type="text" className="w-full bg-gray-900 border border-gray-700 rounded-xl p-4 text-white font-semibold focus:ring-4 focus:ring-orange-500 outline-none transition-all" placeholder="e.g., My Sports Streams" value={newPlName} onChange={e => setNewPlName(e.target.value)} />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Paste raw M3U / M3U8 Content OR a URL</label>
+                            <textarea className="w-full h-48 bg-gray-900 border border-gray-700 rounded-xl p-4 text-gray-300 font-mono text-sm focus:ring-4 focus:ring-orange-500 outline-none transition-all resize-none" placeholder="https://example.com/playlist.m3u&#10;OR&#10;#EXTM3U&#10;#EXTINF:-1 tvg-name=..." value={newPlContent} onChange={e => setNewPlContent(e.target.value)} />
+                        </div>
+                        {importError && <p className="text-red-500 font-bold bg-red-500/10 p-4 rounded-xl border border-red-500/20">{importError}</p>}
+                        <button 
+                           className="bg-orange-500 hover:bg-orange-600 disabled:bg-gray-700 disabled:text-gray-400 text-white font-bold text-lg py-4 px-8 rounded-xl focus:ring-4 focus:ring-white outline-none transition-all shadow-lg flex justify-center items-center w-max" 
+                           onClick={handleImport} 
+                           disabled={isImporting}
+                        >
+                            {isImporting && <Loader2 className="animate-spin w-6 h-6 mr-2" />}
+                            {isImporting ? 'Importing...' : 'Import Playlist'}
+                        </button>
+                    </div>
+                 </div>
+
+                 <div className="mt-12 max-w-3xl">
+                     <h3 className="text-2xl font-bold mb-6 text-white">Active Playlists</h3>
+                     {playlists.map(pl => (
+                        <div key={pl.id} className="flex items-center justify-between bg-gray-800/80 border border-white/5 p-6 rounded-2xl mb-4">
+                           <div>
+                               <h4 className="font-bold text-xl">{pl.name}</h4>
+                               <p className="text-gray-400 font-semibold">{pl.channels.length} channels loaded</p>
+                           </div>
+                           <button className="text-gray-500 hover:text-red-400 p-3 bg-gray-900 rounded-xl focus:ring-4 focus:ring-white outline-none transition-all" onClick={() => setPlaylists(p => p.filter(x => x.id !== pl.id))}>
+                              <Trash2 size={24} />
+                           </button>
+                        </div>
+                     ))}
+                 </div>
+             </div>
+         )}
+
+         {/* Grid / Dashboard View */}
+         {selectedSidebarId !== 'settings' && (
+            <>
+               {/* Hero Banner (Dynamic based on focus) */}
+               <div className="relative h-[45vh] w-full flex-shrink-0 bg-black">
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#0f111a] via-[#0f111a]/80 to-transparent z-10" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0f111a] via-transparent to-transparent z-10" />
+                  
+                  {heroChannel?.logo && (
+                      <img key={heroChannel.id} src={heroChannel.logo} className="absolute right-0 top-0 w-3/4 h-full object-cover animate-fade-in" alt="" />
+                  )}
+
+                  <div className="absolute bottom-12 left-16 z-20 flex flex-col space-y-5 max-w-3xl">
+                     {heroChannel?.logo && (
+                         <div className="w-24 h-24 bg-white/5 p-2 rounded-2xl backdrop-blur-md border border-white/10 shadow-2xl">
+                             <img src={heroChannel.logo} className="w-full h-full object-contain" />
+                         </div>
+                     )}
+                     <h1 className="text-6xl font-black text-white tracking-tight drop-shadow-2xl">
+                         {heroChannel?.name || (contentRows.length === 0 ? 'No Channels' : 'Select a Channel')}
+                     </h1>
+                     <div className="flex items-center space-x-4">
+                         {heroChannel?.group && (
+                            <span className="px-4 py-1.5 bg-orange-500 text-white text-sm font-bold rounded-lg uppercase tracking-widest shadow-lg shadow-orange-500/30">
+                                {heroChannel.group}
+                            </span>
+                         )}
+                         <span className="px-4 py-1.5 bg-white/10 text-white text-sm font-bold rounded-lg backdrop-blur-md uppercase tracking-widest">
+                             LIVE TV
+                         </span>
+                     </div>
+                  </div>
+               </div>
+
+               {/* Channel Rows */}
+               <div className="flex-1 overflow-y-auto overflow-x-hidden pb-32 scrollbar-hide -mt-4 z-20">
+                  {contentRows.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center mt-20 text-gray-600">
+                          <Flame className="w-32 h-32 mb-6 opacity-20" />
+                          <h2 className="text-3xl font-black mb-2 text-gray-500">Playlist is Empty</h2>
+                          <p className="font-semibold">Go to Settings & Import to add M3U channels.</p>
+                      </div>
+                  ) : (
+                      contentRows.map((row, rIdx) => (
+                         <div key={rIdx} className="mb-10">
+                            <h3 className="text-2xl font-bold text-white mb-4 px-16 tracking-wide">{row.title}</h3>
+                            <div className="flex px-16 space-x-5 overflow-x-hidden pt-4 pb-8">
+                               {row.channels.map((ch, cIdx) => {
+                                   const isFocused = navState.zone === 'content' && navState.contentRow === rIdx && navState.contentCol === cIdx;
+                                   return (
+                                      <div
+                                         key={ch.id}
+                                         id={`channel-${rIdx}-${cIdx}`}
+                                         onClick={() => {
+                                            setNavState(p => ({ ...p, zone: 'content', contentRow: rIdx, contentCol: cIdx }));
+                                            setPlayingChannel(ch);
+                                         }}
+                                         className={`relative flex-shrink-0 w-72 h-40 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 ${
+                                            isFocused ? 'ring-4 ring-orange-500 scale-110 z-10 shadow-2xl shadow-orange-500/40 bg-gray-700' : 'opacity-60 hover:opacity-100 bg-gray-800 border border-white/5'
+                                         }`}
+                                      >
+                                         {ch.logo ? (
+                                            <div className="w-full h-full bg-black/40 flex items-center justify-center p-6">
+                                                <img src={ch.logo} alt={ch.name} className="max-w-full max-h-full object-contain" />
+                                            </div>
+                                         ) : (
+                                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900 p-6">
+                                                <span className="text-gray-400 font-black text-2xl text-center leading-tight">{ch.name}</span>
+                                            </div>
+                                         )}
+                                         
+                                         {/* Gradient Overlay for Title */}
+                                         <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black via-black/80 to-transparent p-4 pt-12">
+                                            <p className="text-white font-bold truncate text-base">{ch.name}</p>
+                                         </div>
+
+                                         {/* Play Icon overlay when focused */}
+                                         {isFocused && (
+                                            <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 hover:opacity-100 transition-opacity">
+                                               <div className="bg-orange-500 rounded-full p-3 shadow-lg">
+                                                  <Play className="w-8 h-8 text-white fill-current ml-1" />
+                                               </div>
+                                            </div>
+                                         )}
+                                      </div>
+                                   )
+                               })}
+                            </div>
+                         </div>
+                      ))
+                  )}
+               </div>
+            </>
+         )}
+      </div>
+    </div>
+  );
+}
